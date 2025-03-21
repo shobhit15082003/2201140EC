@@ -1,37 +1,37 @@
 const axios = require('axios');
-const { fetchAuthToken } = require('./authService');  
-require('dotenv').config();  
+const { fetchAuthToken } = require('./authService');
+require('dotenv').config();
 
-const endpoints = {
-    p: 'https://20.244.56.144/test/primes',
-    f: 'https://20.244.56.144/test/fibo',
-    e: 'https://20.244.56.144/test/even',
-    r: 'https://20.244.56.144/test/rand',
+const API_MAP = {
+    p: 'primes',
+    f: 'fibo',
+    e: 'even',
+    r: 'rand',
 };
 
-const fetchNums = async (type) => {
-    const url = endpoints[type];
-    if (!url) {
+const fetchNumbers = async (type) => {
+    const path = API_MAP[type];
+    if (!path) {
         console.warn(`Invalid type '${type}' provided.`);
-        return null;
+        return [];
     }
 
+    const url = `${process.env.THIRD_PARTY_BASE_URL}/${path}`;
+
     try {
-        const token = await fetchAuthToken();  
+        const token = await fetchAuthToken();
 
         const response = await axios.get(url, {
             headers: {
-                Authorization: `Bearer ${token}` 
+                Authorization: `Bearer ${token}`,
             },
-            timeout: 500
+            timeout: 500,
         });
 
         return Array.isArray(response.data?.numbers) ? response.data.numbers : [];
-    } catch (e) {
-        console.log(e.message);
-        console.error(e);
-        return null;
+    } catch (error) {
+        return [];
     }
 };
 
-module.exports = fetchNums;
+module.exports = { fetchNumbers };
